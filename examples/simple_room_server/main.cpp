@@ -2,6 +2,7 @@
 #include <Mesh.h>
 
 #include "MyMesh.h"
+#include "RoomHistoryStore.h"
 
 #ifdef ETHERNET_ENABLED
   #define ETHERNET_CLI_BANNER "MeshCore Room Server CLI"
@@ -16,6 +17,7 @@
 StdRNG fast_rng;
 SimpleMeshTables tables;
 MyMesh the_mesh(board, radio_driver, *new ArduinoMillis(), fast_rng, rtc_clock, tables);
+RoomHistoryStore room_history;
 
 void halt() {
   while (1) ;
@@ -86,6 +88,7 @@ void setup() {
   sensors.begin();
 
   the_mesh.begin(fs);
+  room_history.begin(the_mesh);
 
 #ifdef DISPLAY_CLASS
   ui_task.begin(the_mesh.getNodePrefs(), FIRMWARE_BUILD_DATE, FIRMWARE_VERSION);
@@ -149,6 +152,7 @@ void loop() {
 #endif
 
   the_mesh.loop();
+  room_history.captureNewPosts(the_mesh);
   sensors.loop();
 #ifdef DISPLAY_CLASS
   ui_task.loop();
