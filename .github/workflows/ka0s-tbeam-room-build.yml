@@ -22,10 +22,14 @@ jobs:
       - name: Build T-Beam 1W Room Server
         run: pio run -e LilyGo_TBeam_1W_room_server
 
+      - name: Build merged flash image
+        run: pio run -e LilyGo_TBeam_1W_room_server -t mergebin
+
       - name: Upload firmware
         uses: actions/upload-artifact@v4
         with:
           name: ka0s-tbeam-1w-room
           path: |
             .pio/build/LilyGo_TBeam_1W_room_server/firmware.bin
+            .pio/build/LilyGo_TBeam_1W_room_server/firmware-merged.bin
             .pio/build/LilyGo_TBeam_1W_room_server/firmware.elf
