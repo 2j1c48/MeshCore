@@ -8,9 +8,9 @@ TBeam1WBoard board;
   MomentaryButton user_btn(PIN_USER_BTN, 1000, true);
 #endif
 
-static SPIClass spi;
+SPIClass tbeam_shared_spi;
 
-RADIO_CLASS radio = new Module(P_LORA_NSS, P_LORA_DIO_1, P_LORA_RESET, P_LORA_BUSY, spi);
+RADIO_CLASS radio = new Module(P_LORA_NSS, P_LORA_DIO_1, P_LORA_RESET, P_LORA_BUSY, tbeam_shared_spi);
 
 WRAPPER_CLASS radio_driver(radio, board);
 
@@ -29,12 +29,12 @@ bool radio_init() {
   fallback_clock.begin();
   rtc_clock.begin(Wire);
 
-  // Initialize SPI for radio
-  spi.begin(P_LORA_SCLK, P_LORA_MISO, P_LORA_MOSI);
+  // Initialize the bus shared by the SX1262 and microSD card.
+  tbeam_shared_spi.begin(P_LORA_SCLK, P_LORA_MISO, P_LORA_MOSI);
 
   // GPS serial initialized by EnvironmentSensorManager::begin()
 
-  bool success = radio.std_init(&spi);
+  bool success = radio.std_init(&tbeam_shared_spi);
   if (success) {
     // T-Beam 1W has external PA requiring longer ramp time (>800us recommended)
     // RADIOLIB_SX126X_PA_RAMP_800U = 0x05
