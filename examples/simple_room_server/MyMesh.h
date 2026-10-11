@@ -180,6 +180,21 @@ public:
   void begin(FILESYSTEM* fs);
   void addSystemPost(const char* postData);
 
+  // Minimal accessors used by the optional persistent Room history layer.
+  // They intentionally expose only snapshots of the existing RAM ring buffer,
+  // keeping normal Room behavior unchanged when persistence is unavailable.
+  int getNextPostIndex() const { return next_post_idx; }
+  bool copyPostAt(int idx, PostInfo& dest) const {
+    if (idx < 0 || idx >= MAX_UNSYNCED_POSTS) return false;
+    dest = posts[idx];
+    return dest.post_timestamp != 0;
+  }
+  void restorePost(const PostInfo& post) {
+    if (post.post_timestamp == 0) return;
+    posts[next_post_idx] = post;
+    next_post_idx = (next_post_idx + 1) % MAX_UNSYNCED_POSTS;
+  }
+
   const char* getFirmwareVer() override { return FIRMWARE_VERSION; }
   const char* getBuildDate() override { return FIRMWARE_BUILD_DATE; }
   const char* getRole() override { return FIRMWARE_ROLE; }
